@@ -8,17 +8,26 @@ class DynFibonacci {
 
 public:
     // TODO: 实现动态设置容量的构造器
-    DynFibonacci(int capacity): cache(new ?), cached(?) {}
+    DynFibonacci(int capacity) : cache(new size_t[std::max(2, capacity)]{0, 1}), cached(2) {}
 
     // TODO: 实现复制构造器
-    DynFibonacci(DynFibonacci const &other) = delete;
+    DynFibonacci(DynFibonacci const &other) {
+        size_t capacity = sizeof(*other.cache) / sizeof(other.cache[0]);
+        cached = other.cached;
+        cache = new size_t[capacity];
+        std::copy(other.cache, other.cache + other.cached, cache);
+        // std::copy(other.cache, other.cache + capacity, cache);  // TODO: 为何capacity不可以，必须cached？
+        for (int i = 0; i < cached; ++i) {
+            std::cout << cache[i] << " ";
+        }
+    }
 
     // TODO: 实现析构器，释放缓存空间
-    ~DynFibonacci();
+    ~DynFibonacci() { delete[] cache; };
 
     // TODO: 实现正确的缓存优化斐波那契计算
     size_t get(int i) {
-        for (; false; ++cached) {
+        for (; cached <= i; ++cached) {
             cache[cached] = cache[cached - 1] + cache[cached - 2];
         }
         return cache[i];
@@ -28,6 +37,8 @@ public:
     // NOTICE: 名字相同参数也相同，但 const 修饰不同的方法是一对重载方法，可以同时存在
     //         本质上，方法是隐藏了 this 参数的函数
     //         const 修饰作用在 this 上，因此它们实际上参数不同
+    // 隐藏: 常量成员函数会隐藏同名的非常量成员函数。当一个 const 类型的 DynFibonacci 对象调用 get 方法时，
+    // 将调用这个常量版本的方法。当一个非 const 类型的 DynFibonacci 对象调用 get 方法时，将调用非 const 版本的方法。
     size_t get(int i) const {
         if (i <= cached) {
             return cache[i];
