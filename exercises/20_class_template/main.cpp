@@ -7,9 +7,14 @@ struct Tensor4D {
     unsigned int shape[4];
     T *data;
 
-    Tensor4D(unsigned int const shape_[4], T const *data_) {
-        unsigned int size = 1;
+    // Tensor4D(unsigned int const shape_[4], T const *data_) {
+    Tensor4D(const unsigned int (&shape_)[4], T const *data_) {
         // TODO: 填入正确的 shape 并计算 size
+        unsigned int size = 1;
+        for (int i = 0; i < 4; ++i) {
+            shape[i] = shape_[i];
+            size *= shape[i];
+        }
         data = new T[size];
         std::memcpy(data, data_, size * sizeof(T));
     }
@@ -28,6 +33,48 @@ struct Tensor4D {
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
     Tensor4D &operator+=(Tensor4D const &others) {
         // TODO: 实现单向广播的加法
+        // for (int i = 0; i < 4; ++i) {
+        //     std::cout << shape[i] << " ";
+        // }
+        // std::cout << std::endl;
+        // for (int i = 0; i < 4; ++i) {
+        //     std::cout << others.shape[i] << " ";
+        // }
+        for (int i = 0; i < 4; ++i) {
+            if (shape[i] != others.shape[i] && shape[i] != 1 && others.shape[i] != 1) {
+                ASSERT(false, "Shape mismatch");
+            }
+        }
+        unsigned int this_index[4]{0};
+        unsigned int others_index[4]{0};
+        for (this_index[0] = 0; this_index[0] < shape[0]; ++this_index[0]) {
+            // ISSUE: 需要初始化，不然this_index[3]变大后就没法归零了
+            for (this_index[1] = 0; this_index[1] < shape[1]; ++this_index[1]) {
+                for (this_index[2] = 0; this_index[2] < shape[2]; ++this_index[2]) {
+                    for (this_index[3] = 0; this_index[3] < shape[3]; ++this_index[3]) {
+                        others_index[0] = (others.shape[0] == 1) ? 0 : this_index[0];
+                        others_index[1] = (others.shape[1] == 1) ? 0 : this_index[1];
+                        others_index[2] = (others.shape[2] == 1) ? 0 : this_index[2];
+                        others_index[3] = (others.shape[3] == 1) ? 0 : this_index[3];
+                        unsigned int this_abs_index = this_index[0], others_abs_index = others_index[0];
+                        for (int i = 1; i < 4; ++i) {
+                            this_abs_index *= shape[i];
+                            this_abs_index += this_index[i];
+                            others_abs_index *= others.shape[i];
+                            others_abs_index += others_index[i];
+                        }
+                        // for (int i = 0; i < 4; ++i) {
+                        //     std::cout << this_index[i] << " ";
+                        // }
+                        // for (int i = 0; i < 4; ++i) {
+                        //     std::cout << others_index[i] << " ";
+                        // }
+                        data[this_abs_index] += others.data[others_abs_index];
+                        // std::cout << "|| abs index: " << this_abs_index << " " << others_abs_index << "|| add ans: " << data[this_abs_index] << std::endl;
+                    }
+                }
+            }
+        }
         return *this;
     }
 };

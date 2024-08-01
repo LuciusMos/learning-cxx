@@ -17,9 +17,9 @@ public:
         cache = new size_t[capacity];
         std::copy(other.cache, other.cache + other.cached, cache);
         // std::copy(other.cache, other.cache + capacity, cache);  // TODO: 为何capacity不可以，必须cached？
-        for (int i = 0; i < cached; ++i) {
-            std::cout << cache[i] << " ";
-        }
+        // for (int i = 0; i < cached; ++i) {
+        //     std::cout << cache[i] << " ";
+        // }
     }
 
     // TODO: 实现析构器，释放缓存空间
